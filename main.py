@@ -15,15 +15,19 @@ def move_file(current_folder, move_folder, *args):
         imagetype = imghdr.what(file)
         for arg in args:
           if imagetype == arg:
-            shutil.copy(file, move_folder + '/' + file.stem + '_' + str(num))
+            destination_file_path = os.path.join(move_folder, file.stem + '_' + str(num))
+            shutil.copy(file, destination_file_path)
             num += 1
+  if num < 2:
+    return False
 
-# 対象のフォルダ内の拡張子がないファイルを拡張子つきにリネームする
+# 対象フォルダ内の拡張子がないファイルを拡張子付きに変更する
 def rename_file(folder):
   for file in pathlib.Path(folder).rglob('*'):
     imagetype = imghdr.what(file)
     if imagetype is not None:
-      file.rename(folder + '/' + file.stem + '.' + imagetype)
+      rename_file = os.path.join(folder, file.stem + '.' + imagetype)
+      file.rename(rename_file)
 
 if __name__ == '__main__':
 
@@ -36,16 +40,15 @@ if __name__ == '__main__':
 
   while True:
     event, values = window.read()
-    # print(event)
-    # print(values)
-    # print(values)
     if event is sg.WIN_CLOSED or event == '終了':
       break
     elif event == '実行':
       target_folder = values['-current_folder-']
       save_folder = values['-save_folder-']
-      print(target_folder, save_folder)
 
-      move_file(target_folder, save_folder, 'png', 'jpg','jpeg', 'gif')
+      if move_file(target_folder, save_folder, 'png', 'jpg','jpeg', 'gif') == False:
+        show_message ='拡張子を追加するファイルがありませんでした'
+        sg.popup(show_message)
+
       rename_file(save_folder)
   window.close()
