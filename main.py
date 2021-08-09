@@ -23,18 +23,26 @@ def move_file(current_folder, move_folder, *args):
 
 # 対象フォルダ内の拡張子がないファイルを拡張子付きに変更する
 def rename_file(folder):
+  file_count = sum(os.path.isfile(os.path.join(folder, name)) for name in os.listdir(folder) if not name.startswith('.'))
+  # print(file_count)
+  count = 0
   for file in pathlib.Path(folder).rglob('*'):
     imagetype = imghdr.what(file)
     if imagetype is not None:
       rename_file = os.path.join(folder, file.stem + '.' + imagetype)
       file.rename(rename_file)
+      count += 1
+  return file_count, count
 
 if __name__ == '__main__':
 
   layout = [
-    [sg.Text('対象フォルダ'), sg.InputText(key='-current_folder-', enable_events=True),sg.FolderBrowse('選択', target='-current_folder-')],
-    [sg.Text('保存フォルダ'), sg.InputText(key='-save_folder-', enable_events=True),sg.FolderBrowse('選択', target='-save_folder-')],
-    [sg.Button('実行'),sg.Button('終了')]
+    [sg.Text('変換したいファイルがあるフォルダを選択してください。サブフォルダも対象です', font=('小塚ゴシック',16))],
+    [sg.InputText(key='-current_folder-', enable_events=True, font=('小塚ゴシック',16)),sg.FolderBrowse('選択', target='-current_folder-', font=('小塚ゴシック',16))],
+    [sg.Text('')],
+    [sg.Text('変換したファイルを保存するフォルダを選択してください', font=('小塚ゴシック',16))],
+    [sg.InputText(key='-save_folder-', enable_events=True, font=('小塚ゴシック',16)),sg.FolderBrowse('選択', target='-save_folder-', font=('小塚ゴシック',16))],
+    [sg.Button('実行', font=('小塚ゴシック',16)),sg.Button('終了', font=('小塚ゴシック',16))]
   ]
   window = sg.Window('拡張子追加', layout)
 
@@ -50,5 +58,12 @@ if __name__ == '__main__':
         show_message ='拡張子を追加するファイルがありませんでした'
         sg.popup(show_message)
 
-      rename_file(save_folder)
+      file_count, count = rename_file(save_folder)
+      if count > 0:
+        show_message = f'{count} / {file_count} 件 処理しました'
+        sg.popup(show_message)
+      else:
+        show_message = '処理するファイルがありませんでした'
+        sg.popup(show_message)
+
   window.close()
