@@ -48,6 +48,8 @@ def rename_file(folder):
     show_message = f'{count} 件 処理しました'
   else:
     show_message = f'{count} / {len(file_list)} 件 処理しました'
+  if count == 0:
+    remove_file(file_list)
   return show_message
 
 # 重複ファイルをリネームする。引数はフルパス
@@ -66,6 +68,8 @@ def duplicate_name(file_path):
 # フォルダが正しく選択されているかチェックする
 def check_folder(folder_path1, folder_path2):
     show_message = ''
+    if folder_path1 == pathlib.Path('.') or folder_path2 == pathlib.Path('.'):
+      show_message = 'フォルダを指定してください'
     if folder_path1 == folder_path2:
       show_message ='2つフォルダは別の場所を指定してください'
     if not os.path.exists(folder_path1):
@@ -78,11 +82,10 @@ def check_folder(folder_path1, folder_path2):
 def remove_file(file_path_list):
   if len(file_path_list) == 0:
     return False
-  
   for file in file_path_list:
     os.remove(file)
-  
   file_path_list.clear()
+
 
 if __name__ == '__main__':
 
@@ -102,8 +105,8 @@ if __name__ == '__main__':
     if event is sg.WIN_CLOSED or event == '終了':
       break
     elif event == '実行':
-      target_folder = values['-current_folder-']
-      save_folder = values['-save_folder-']
+      target_folder = pathlib.Path(values['-current_folder-'])
+      save_folder = pathlib.Path(values['-save_folder-'])
 
       # 指定フォルダのチェック
       message = check_folder(target_folder, save_folder)
